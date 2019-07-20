@@ -1,0 +1,12 @@
+{
+while true
+do
+out=$(ping -qc1 www.google.com 2>&1 | awk -F'/' 'END{ print (/^rtt/? "OK" :"FAIL")  }')
+
+if [[ $out == "OK" ]]; then
+	notify-send -t 10000 "WiFi is ON" "You have internet access, enjoy surfing"
+	break
+fi
+sleep 30
+done
+} &
