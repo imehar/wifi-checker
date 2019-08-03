@@ -27,7 +27,10 @@ run the script:
 
 You're all done! :
 ```
- netstatus
+ netstatus [to get connectivity status of internet]
+```
+```
+netstatus -s or netstatus --speed [to get download speed]
 ```
 
 Just open a terminal, type netstatus.
