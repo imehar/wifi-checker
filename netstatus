@@ -1,12 +1,43 @@
-{
-while true
-do
-out=$(ping -qc1 www.google.com 2>&1 | awk -F'/' 'END{ print (/^rtt/? "OK" :"FAIL")  }')
+#!/bin/bash
 
-if [[ $out == "OK" ]]; then
-	notify-send -t 10000 "WiFi is ON" "You have internet access, enjoy surfing"
-	break
+if [[ $# -eq 0 ]]; then
+	{
+	while true
+	do
+	out=$(ping -qc1 www.google.com 2>&1 | awk -F'/' 'END{ print (/^rtt/? "OK" :"FAIL")  }')
+
+	if [[ $out == "OK" ]]; then
+		notify-send -t 10000 "WiFi is ON" "You have internet access, enjoy surfing"
+		break
+	fi
+	sleep 30
+	done
+	} &
+elif [ $1 == "-s" ] || [ $1 == "--speed" ]; then
+	TMP_PATH=./speedtest_data/
+	TEST_TIME=10
+
+	rm -rf $TMP_PATH && mkdir $TMP_PATH
+
+	links=("http://speedtest.tele2.net/10MB.zip" "http://speedtest.tele2.net/100MB.zip" "http://speedtest.tele2.net/1GB.zip" "http://speedtest.tele2.net/10GB.zip" "http://speedtest.tele2.net/50GB.zip" "http://speedtest.tele2.net/100GB.zip" "http://speedtest.tele2.net/1000GB.zip")
+
+	echo "Testing download"
+
+	for link in ${links[*]}
+	do
+	    timeout $TEST_TIME wget -q -P $TMP_PATH $link &
+	done
+
+	wait
+
+	total_bytes=$(du -c $TMP_PATH | grep total | awk '{print $1}')
+
+	# echo "Cleaning up"
+	rm -rf $TMP_PATH
+	# echo $total_bytes
+	speed=$(echo "scale=2; $total_bytes / $TEST_TIME / 128" |bc)
+
+	echo "Speed is $speed Mbit/s"
+else
+	echo "Usage: netstatus (for checking connection) and netstatus -s (--speed) for getting download speed"
 fi
-sleep 30
-done
-} &
